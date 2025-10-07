@@ -1,10 +1,11 @@
-"use client";
 
 import { GradientButton } from "@/components/Button";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-export default function Start() {
+
+// Components
+export const StartComponent = ({ onStart }: { onStart: () => void }) => {
   const bubbles = Array.from({ length: 100 }).map(() => ({
     left: Math.random() * 100,
     size: Math.random() * 12 + 6,
@@ -117,10 +118,10 @@ export default function Start() {
 
       {/* 시작 버튼 */}
       <section className="py-16 w-full flex justify-center relative z-20">
-        <GradientButton variant="primary" size="lg" className="w-full max-w-[300px]">
+        <GradientButton variant="primary" size="lg" className="w-full max-w-[300px]" onClick={onStart}>
           시작하기
         </GradientButton>
       </section>
     </div>
   );
-}
+};

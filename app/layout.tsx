@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,6 +21,26 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Dongle&display=swap"
           rel="stylesheet"
         />
+        <Script src="//wcs.naver.net/wcslog.js" strategy="beforeInteractive"></Script>
+        <Script strategy="lazyOnload">
+          {`
+  if(!wcs_add) var wcs_add = {};
+  wcs_add["wa"] = "12e354f3d63e900";
+  if(window.wcs) {
+  wcs_do();
+}
+  `}
+        </Script>
+        {/* <Script src="//wcs.naver.net/wcslog.js" strategy="afterInteractive" />
+        <Script id="naver-analytics" strategy="afterInteractive">
+          {`
+          if(!wcs_add) var wcs_add = {};
+          wcs_add["wa"] = "12e354f3d63e900";
+          if(window.wcs) {
+            wcs_do();
+          }
+        `}
+        </Script> */}
       </head>
       <body
         className="antialiased w-full overflow-x-hidden bg-gradient-to-r from-[#FF6F91] via-[#FFD43B] to-[#4FB1FF]"
