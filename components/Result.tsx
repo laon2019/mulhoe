@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { GradientButton } from "./Button";
 import { RiKakaoTalkFill } from "react-icons/ri";
 import { FaLink } from "react-icons/fa";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 declare global {
   interface Window {
@@ -33,13 +33,13 @@ export const ResultComponent = ({
   };
 
   // Mapping of mulhoeType to details
-  const resultDetails: { [key: string]: { emoji: string; image: string } } = {
-    SokchoPa: { emoji: "🩵", image: "/imgs/default.png" },
-    PohangPa: { emoji: "❤️", image: "/imgs/default.png" },
-    GangneungPa: { emoji: "💖", image: "/imgs/default.png" },
-    JejuDoenjangPa: { emoji: "🤎", image: "/imgs/default.png" },
-    JariMulhoePa: { emoji: "💛", image: "/imgs/default.png" },
-    NamhaePa: { emoji: "💚", image: "/imgs/default.png" },
+  const resultDetails: { [key: string]: { emoji: string; image: string; shareImage: string } } = {
+    SokchoPa: { emoji: "🩵", image: "/imgs/SokchoPa.svg", shareImage: "/imgs/SokchoPa.png" },
+    PohangPa: { emoji: "❤️", image: "/imgs/PohangPa.svg", shareImage: "/imgs/PohangPa.png" },
+    GangneungPa: { emoji: "💖", image: "/imgs/GangneungPa.svg", shareImage: "/imgs/GangneungPa.png" },
+    JejuDoenjangPa: { emoji: "🤎", image: "/imgs/JejuDoenjangPa.svg", shareImage: "/imgs/JejuDoenjangPa.png" },
+    JariMulhoePa: { emoji: "💛", image: "/imgs/JariMulhoePa.svg", shareImage: "/imgs/JariMulhoePa.png" },
+    NamhaePa: { emoji: "💚", image: "/imgs/NamhaePa.svg", shareImage: "/imgs/NamhaePa.png" },
   };
 
   useEffect(() => {
@@ -83,8 +83,11 @@ export const ResultComponent = ({
       const shareTitle = "내 물회 취향 테스트 결과!";
       const shareDescription = `내 물회 취향은 ${mulhoeTypeToKorean[mulhoeType] || mulhoeType}! 너도 테스트 해봐!`;
       const shareUrl = "https://mulhoe.vercel.app/";
-      const imageUrl = resultDetails[mulhoeType]?.image || "/imgs/default.png";
+      const imageUrl = resultDetails[mulhoeType]?.shareImage || "/imgs/default.jpeg";
       const fullImageUrl = `https://mulhoe.vercel.app${imageUrl}`;
+
+      // 디버깅을 위한 로그 추가
+      console.log("Share attempt:", { shareTitle, shareDescription, shareUrl, fullImageUrl });
 
       window.Kakao.Share.sendCustom({
         templateId: 124927,
@@ -97,8 +100,8 @@ export const ResultComponent = ({
       });
     } catch (error) {
       console.error("Kakao share error:", error);
-      toast.error("공유 중 문제가 발생했습니다.", {
-        duration: 2000,
+      toast.error(`공유 중 문제가 발생했습니다`, {
+        duration: 3000,
       });
     }
   };
@@ -118,88 +121,63 @@ export const ResultComponent = ({
       });
   };
 
-  const { emoji, image } = resultDetails[mulhoeType] || { emoji: "❓", image: "" };
-  const displayMulhoeType = mulhoeTypeToKorean[mulhoeType] || mulhoeType; // Use Korean name for display
+  const { emoji, image, shareImage } = resultDetails[mulhoeType] || { emoji: "❓", image: "", shareImage: "" };
+  const displayMulhoeType = mulhoeTypeToKorean[mulhoeType] || mulhoeType;
 
   return (
-    <div className="w-full min-h-[100svh] flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
+    <div className="w-full min-h-[100svh] flex flex-col bg-gradient-to-br from-blue-50 via-white to-blue-50">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-md"
+        className="flex-1 flex flex-col"
       >
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-          {/* Image Section */}
-          {image && (
-            <div className="relative w-full aspect-square bg-gradient-to-br from-blue-100 to-blue-50">
-              <img
-                src={image}
-                alt={displayMulhoeType}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+        {/* Image Section - Full Width */}
+        {image && (
+          <div className="flex-1 flex items-center justify-center w-full p-4">
+            <img
+              src={image}
+              alt={displayMulhoeType}
+              className="w-full h-auto max-w-2xl object-contain"
+            />
+          </div>
+        )}
 
-          {/* Content Section */}
-          <div className="p-8 space-y-6">
-            {/* Result Text */}
-            <div className="text-center space-y-3">
-              <div className="text-5xl mb-2">{emoji}</div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                내 물회 취향은
-              </h1>
-              <div className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full">
-                <span className="text-2xl font-bold text-white">{displayMulhoeType}</span>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p className="text-center text-2xl font-bold text-gray-600 leading-relaxed px-2">
-              {resultText}
-            </p>
-
-            {/* Buttons */}
-            <div className="space-y-3 pt-2">
-              <GradientButton
-                variant="secondary"
-                size="sm"
+        {/* Buttons Section */}
+        <div className="w-full px-6 pb-8 space-y-4">
+          {/* Share Buttons */}
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={handleCopyLink}
+              className="flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 hover:scale-110 active:scale-95"
+              aria-label="링크 복사"
+            >
+              <FaLink className="w-5 h-5 text-gray-700" />
+            </button>
+            <button
+              onClick={handleKakaoShare}
+              className="flex items-center justify-center w-14 h-14 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-all duration-200 hover:scale-110 active:scale-95"
+              aria-label="카카오톡 공유"
+            >
+              <RiKakaoTalkFill className="w-6 h-6 text-gray-900" />
+            </button>
+          </div>
+          <div className="flex items-center justify-center">
+            <motion.div
+              whileHover={{ scale: 1.1, cursor: "pointer" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <Image
+                src="/imgs/startBtn.svg"
+                alt="Start Button"
+                width={360}
+                height={80}
+                className="object-contain"
                 onClick={onRestart}
-                className="w-full"
-              >
-                다시 테스트하기
-              </GradientButton>
-
-              {/* Share Buttons */}
-              <div className="flex items-center justify-center gap-3 pt-2">
-                <button
-                  onClick={handleCopyLink}
-                  className="flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 hover:scale-110 active:scale-95"
-                  aria-label="링크 복사"
-                >
-                  <FaLink className="w-5 h-5 text-gray-700" />
-                </button>
-                <button
-                  onClick={handleKakaoShare}
-                  className="flex items-center justify-center w-14 h-14 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-all duration-200 hover:scale-110 active:scale-95"
-                  aria-label="카카오톡 공유"
-                >
-                  <RiKakaoTalkFill className="w-6 h-6 text-gray-900" />
-                </button>
-              </div>
-            </div>
+              />
+            </motion.div>
           </div>
         </div>
-
-        {/* Bottom Text */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-center text-sm text-gray-500 mt-6"
-        >
-          친구들과 결과를 공유해보세요 ✨
-        </motion.p>
       </motion.div>
     </div>
   );
