@@ -5,10 +5,11 @@ export const StartComponent = ({ onStart }: { onStart: () => void }) => {
   return (
     <div className="w-full h-[100svh] relative">
       <Image
-        src="/imgs/startPoster.svg"
+        src="/imgs/startPoster.webp"
         alt="Start Poster"
         fill
         className="object-cover"
+        priority
       />
       <div className="absolute bottom-0 w-full flex justify-center">
         <motion.div
