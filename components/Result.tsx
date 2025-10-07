@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { GradientButton } from "./Button";
 import { RiKakaoTalkFill } from "react-icons/ri";
@@ -14,38 +13,40 @@ declare global {
   }
 }
 
-export const ResultComponent = ({ resultText, onRestart }: { resultText: string; onRestart: () => void }) => {
-  const router = useRouter();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Mapping of results to routes and details
-  const resultToRoute: { [key: string]: string } = {
-    속초파: "/sokcho",
-    포항파: "/pohang",
-    강릉파: "/gangneung",
-    울진파: "/uljin",
-    제주된장파: "/jeju-doenjang",
-    삼척파: "/samcheok",
-    자리물회파: "/jari-mulhoe",
-    남해파: "/namhae",
+export const ResultComponent = ({
+  resultText,
+  mulhoeType,
+  onRestart,
+}: {
+  resultText: string;
+  mulhoeType: string;
+  onRestart: () => void;
+}) => {
+  // Mapping of English mulhoeType to Korean display names
+  const mulhoeTypeToKorean: { [key: string]: string } = {
+    SokchoPa: "속초파",
+    PohangPa: "포항파",
+    GangneungPa: "강릉파",
+    JejuDoenjangPa: "제주된장파",
+    JariMulhoePa: "자리물회파",
+    NamhaePa: "남해파",
   };
 
-  const resultDetails: { [key: string]: { emoji: string; color: string; image: string } } = {
-    속초파: { emoji: "🩵", color: "#3B82F6", image: "/imgs/SokchoPa.png" },
-    포항파: { emoji: "❤️", color: "#EF4444", image: "/imgs/PohangPa.png" },
-    강릉파: { emoji: "💖", color: "#EC4899", image: "/imgs/GangneungPa.png" },
-    울진파: { emoji: "💜", color: "#8B5CF6", image: "/imgs/UljinPa.png" },
-    제주된장파: { emoji: "🤎", color: "#8D5524", image: "/imgs/JejuDoenjangPa.png" },
-    삼척파: { emoji: "🤍", color: "#6B7280", image: "/imgs/SamcheokPa.png" },
-    자리물회파: { emoji: "💛", color: "#D97706", image: "/imgs/JariMulhoePa.png" },
-    남해파: { emoji: "💚", color: "#10B981", image: "/imgs/NamhaePa.png" },
+  // Mapping of mulhoeType to details
+  const resultDetails: { [key: string]: { emoji: string; image: string } } = {
+    SokchoPa: { emoji: "🩵", image: "/imgs/default.png" },
+    PohangPa: { emoji: "❤️", image: "/imgs/default.png" },
+    GangneungPa: { emoji: "💖", image: "/imgs/default.png" },
+    JejuDoenjangPa: { emoji: "🤎", image: "/imgs/default.png" },
+    JariMulhoePa: { emoji: "💛", image: "/imgs/default.png" },
+    NamhaePa: { emoji: "💚", image: "/imgs/default.png" },
   };
 
-  // Initialize Kakao SDK
   useEffect(() => {
     const initKakaoSDK = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
-        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_KEY); // Replace with your Kakao JS key
+        window.Kakao.cleanup();
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_KEY);
       }
     };
 
@@ -57,136 +58,47 @@ export const ResultComponent = ({ resultText, onRestart }: { resultText: string;
       script.async = true;
       script.onload = initKakaoSDK;
       document.head.appendChild(script);
-
-      return () => {
-        const scripts = document.head.getElementsByTagName("script");
-        for (let i = 0; i < scripts.length; i++) {
-          if (scripts[i].src.includes("kakao_js_sdk")) {
-            document.head.removeChild(scripts[i]);
-            break;
-          }
-        }
-      };
     }
+
+    return () => {
+      const scripts = document.head.getElementsByTagName("script");
+      for (let i = 0; i < scripts.length; i++) {
+        if (scripts[i].src.includes("kakao_js_sdk")) {
+          document.head.removeChild(scripts[i]);
+          break;
+        }
+      }
+    };
   }, []);
 
-  const handleNavigate = () => {
-    const route = resultToRoute[resultText];
-    if (route) {
-      router.push(route);
-    }
-  };
-
   const handleKakaoShare = () => {
-    if (!window.Kakao || !window.Kakao.isInitialized()) {
+    if (!window.Kakao || !window.Kakao.Share) {
       toast.error("카카오 공유 기능을 사용할 수 없습니다.", {
         duration: 2000,
       });
       return;
     }
 
-    const imageUrl = resultDetails[resultText]?.image || "/imgs/default.png"; // Fallback image
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const img = new Image();
-      img.src = `https://mulhoe.vercel.app${imageUrl}`; // Full URL for the image
-      img.crossOrigin = "anonymous"; // Handle CORS if needed
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const file = new File([blob], `${resultText}.png`, {
-                type: "image/png",
-                lastModified: Date.now(),
-              });
-              const dataTransfer = new DataTransfer();
-              dataTransfer.items.add(file);
+    try {
+      const shareTitle = "내 물회 취향 테스트 결과!";
+      const shareDescription = `내 물회 취향은 ${mulhoeTypeToKorean[mulhoeType] || mulhoeType}! 너도 테스트 해봐!`;
+      const shareUrl = "https://mulhoe.vercel.app/";
+      const imageUrl = resultDetails[mulhoeType]?.image || "/imgs/default.png";
+      const fullImageUrl = `https://mulhoe.vercel.app${imageUrl}`;
 
-              window.Kakao.Share.uploadImage({
-                file: dataTransfer.files,
-              })
-                .then((response: any) => {
-                  try {
-                    window.Kakao.Share.sendCustom({
-                      templateId: 115327, // Replace with your Kakao template ID
-                      templateArgs: {
-                        title: "내 물회 취향 테스트 결과!",
-                        description: `내 물회 취향은 ${resultText}! 너도 테스트 해봐!`,
-                        image: response.infos.original.url,
-                        shareUrl: "https://mulhoe.vercel.app/",
-                      },
-                    });
-                  } catch (error) {
-                    // Fallback to sendDefault
-                    window.Kakao.Link.sendDefault({
-                      objectType: "feed",
-                      content: {
-                        title: "내 물회 취향 테스트 결과!",
-                        description: `내 물회 취향은 ${resultText}! 너도 테스트 해봐!`,
-                        imageUrl: `https://mulhoe.vercel.app${imageUrl}`,
-                        link: {
-                          mobileWebUrl: "https://mulhoe.vercel.app/",
-                          webUrl: "https://mulhoe.vercel.app/",
-                        },
-                      },
-                      buttons: [
-                        {
-                          title: "테스트 하러 가기",
-                          link: {
-                            mobileWebUrl: "https://mulhoe.vercel.app/",
-                            webUrl: "https://mulhoe.vercel.app/",
-                          },
-                        },
-                      ],
-                    });
-                  }
-                })
-                .catch((error: any) => {
-                  console.error("Kakao image upload error:", error);
-                  toast.error("이미지 업로드 중 오류가 발생했습니다.", {
-                    duration: 2000,
-                  });
-                });
-            } else {
-              console.error("Canvas returned null for Blob");
-              toast.error("이미지 처리 중 오류가 발생했습니다.", {
-                duration: 2000,
-              });
-            }
-          }, "image/png");
-        }
-      };
-      img.onerror = () => {
-        toast.error("이미지 로드 중 오류가 발생했습니다.", {
-          duration: 2000,
-        });
-      };
-    } else {
-      // Fallback to sendDefault without image upload
-      window.Kakao.Link.sendDefault({
-        objectType: "feed",
-        content: {
-          title: "내 물회 취향 테스트 결과!",
-          description: `내 물회 취향은 ${resultText}! 너도 테스트 해봐!`,
-          imageUrl: `https://mulhoe.vercel.app${imageUrl}`,
-          link: {
-            mobileWebUrl: "https://mulhoe.vercel.app/",
-            webUrl: "https://mulhoe.vercel.app/",
-          },
+      window.Kakao.Share.sendCustom({
+        templateId: 124927,
+        templateArgs: {
+          title: shareTitle,
+          description: shareDescription,
+          image: fullImageUrl,
+          shareUrl: shareUrl,
         },
-        buttons: [
-          {
-            title: "테스트 하러 가기",
-            link: {
-              mobileWebUrl: "https://mulhoe.vercel.app/",
-              webUrl: "https://mulhoe.vercel.app/",
-            },
-          },
-        ],
+      });
+    } catch (error) {
+      console.error("Kakao share error:", error);
+      toast.error("공유 중 문제가 발생했습니다.", {
+        duration: 2000,
       });
     }
   };
@@ -206,45 +118,88 @@ export const ResultComponent = ({ resultText, onRestart }: { resultText: string;
       });
   };
 
-  const { emoji, color } = resultDetails[resultText] || { emoji: "❓", color: "#6B7280" };
+  const { emoji, image } = resultDetails[mulhoeType] || { emoji: "❓", image: "" };
+  const displayMulhoeType = mulhoeTypeToKorean[mulhoeType] || mulhoeType; // Use Korean name for display
 
   return (
-    <div className="w-full h-[100svh] flex flex-col items-center justify-center bg-gradient-to-b from-[#1E3A8A] to-[#3B82F6] text-white px-6">
+    <div className="w-full min-h-[100svh] flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center max-w-lg bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-lg"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md"
       >
-        <h1 className="text-4xl font-bold mb-4" style={{ color }}>
-          {emoji} 내 물회 취향은 <span className="underline">{resultText}</span>!
-        </h1>
-        <p className="text-lg mb-6">
-          결과를 확인하여 당신에게 맞는 물회 스타일을 알아보세요!
-        </p>
-        <div className="flex flex-col gap-4 items-center">
-          <GradientButton variant="primary" size="lg" onClick={handleNavigate}>
-            결과 상세 보기
-          </GradientButton>
-          <GradientButton variant="secondary" size="lg" onClick={onRestart}>
-            다시 시작
-          </GradientButton>
-          <div className="flex gap-4">
-            <button
-              onClick={handleCopyLink}
-              className="rounded-full bg-gray-100 p-3 flex justify-center items-center transition-transform hover:scale-110 active:scale-95"
-            >
-              <FaLink className="w-8 h-8 text-gray-600" />
-            </button>
-            <button
-              onClick={handleKakaoShare}
-              className="rounded-full bg-yellow-400 p-3 flex justify-center items-center transition-transform hover:scale-110 active:scale-95"
-            >
-              <RiKakaoTalkFill className="w-8 h-8 text-black" />
-            </button>
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+          {/* Image Section */}
+          {image && (
+            <div className="relative w-full aspect-square bg-gradient-to-br from-blue-100 to-blue-50">
+              <img
+                src={image}
+                alt={displayMulhoeType}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Content Section */}
+          <div className="p-8 space-y-6">
+            {/* Result Text */}
+            <div className="text-center space-y-3">
+              <div className="text-5xl mb-2">{emoji}</div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                내 물회 취향은
+              </h1>
+              <div className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full">
+                <span className="text-2xl font-bold text-white">{displayMulhoeType}</span>
+              </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-center text-2xl font-bold text-gray-600 leading-relaxed px-2">
+              {resultText}
+            </p>
+
+            {/* Buttons */}
+            <div className="space-y-3 pt-2">
+              <GradientButton
+                variant="secondary"
+                size="sm"
+                onClick={onRestart}
+                className="w-full"
+              >
+                다시 테스트하기
+              </GradientButton>
+
+              {/* Share Buttons */}
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 hover:scale-110 active:scale-95"
+                  aria-label="링크 복사"
+                >
+                  <FaLink className="w-5 h-5 text-gray-700" />
+                </button>
+                <button
+                  onClick={handleKakaoShare}
+                  className="flex items-center justify-center w-14 h-14 rounded-full bg-yellow-400 hover:bg-yellow-500 transition-all duration-200 hover:scale-110 active:scale-95"
+                  aria-label="카카오톡 공유"
+                >
+                  <RiKakaoTalkFill className="w-6 h-6 text-gray-900" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <canvas ref={canvasRef} style={{ display: "none" }} />
+
+        {/* Bottom Text */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-center text-sm text-gray-500 mt-6"
+        >
+          친구들과 결과를 공유해보세요 ✨
+        </motion.p>
       </motion.div>
     </div>
   );

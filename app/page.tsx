@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GradientButton } from "@/components/Button";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -8,13 +8,15 @@ import { questions } from "@/utils/constants";
 import { StartComponent } from "@/components/Start";
 import { ProcessComponent } from "@/components/Process";
 import { ResultComponent } from "@/components/Result";
+import LoadingPage from "@/components/Loading";
 
 // Main Component
 export default function Home() {
-  const [currentState, setCurrentState] = useState<"start" | "process" | "result">("start");
+  const [currentState, setCurrentState] = useState<"start" | "process" | "loading" | "result">("start");
   const [currentPage, setCurrentPage] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
   const [resultText, setResultText] = useState<string>("");
+  const [mulhoeType, setMulhoeType] = useState<string>("");
 
   // Define result keys as a type
   type ResultKey = "속초파" | "포항파" | "강릉파" | "제주된장파" | "자리물회파" | "남해파";
@@ -25,6 +27,16 @@ export default function Home() {
     제주된장파: "제주된장파 유형: 구수한 된장과 든든함을 즐기는 당신! 아침 바다에서 힐링하세요.",
     자리물회파: "자리물회파 유형: 짭조름한 바다 냄새와 쫄깃한 식감을 사랑하는 당신! 자연 속에서 자유를 느껴보세요.",
     남해파: "남해파 유형: 부드럽고 향미로운 해산물을 즐기는 당신! 저녁 바다에서 낭만을 만끽하세요.",
+  };
+
+  // Map Korean result keys to English Mulhoe types
+  const resultKeyToMulhoeType: Record<ResultKey, string> = {
+    속초파: "SokchoPa",
+    포항파: "PohangPa",
+    강릉파: "GangneungPa",
+    제주된장파: "JejuDoenjangPa",
+    자리물회파: "JariMulhoePa",
+    남해파: "NamhaePa",
   };
 
   const handleAnswer = (choice: number) => {
@@ -52,15 +64,27 @@ export default function Home() {
       const dominantResult = Object.entries(scores).reduce((a, b) => a[1] > b[1] ? a : b)[0] as ResultKey;
       const finalResult = results[dominantResult].replace("{score}", totalScore.toFixed(2));
       setResultText(finalResult); // Update result text state
-      setCurrentState("result"); // Move to result state
+      setMulhoeType(resultKeyToMulhoeType[dominantResult]); // Set Mulhoe type
+      setCurrentState("loading"); // Transition to loading state
     }
   };
+
+  // Handle loading state transition to result after 2 seconds
+  useEffect(() => {
+    if (currentState === "loading") {
+      const timer = setTimeout(() => {
+        setCurrentState("result");
+      }, 2000); // 2-second delay
+      return () => clearTimeout(timer); // Cleanup timer on unmount
+    }
+  }, [currentState]);
 
   const restart = () => {
     setCurrentState("start");
     setCurrentPage(0);
     setAnswers({});
     setResultText(""); // Reset result text
+    setMulhoeType(""); // Reset Mulhoe type
   };
 
   return (
@@ -71,8 +95,10 @@ export default function Home() {
             return <StartComponent onStart={() => setCurrentState("process")} />;
           case "process":
             return <ProcessComponent currentPage={currentPage} answers={answers} handleAnswer={handleAnswer} />;
+          case "loading":
+            return <LoadingPage />;
           case "result":
-            return <ResultComponent resultText={resultText} onRestart={restart} />;
+            return <ResultComponent resultText={resultText} mulhoeType={mulhoeType} onRestart={restart} />;
           default:
             return null;
         }
