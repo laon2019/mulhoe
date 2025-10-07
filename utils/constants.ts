@@ -7,6 +7,9 @@ export const questions = [
     resultA: "속초파",
     resultB: "포항파",
     score: 1.2,
+    bgGradient: "from-blue-100 to-cyan-50",
+    accentColor: "bg-blue-500",
+    decorColor: "text-blue-400",
   },
   {
     id: 2,
@@ -16,6 +19,9 @@ export const questions = [
     resultA: "강릉파",
     resultB: "포항파",
     score: 1.15,
+    bgGradient: "from-orange-100 to-yellow-50",
+    accentColor: "bg-orange-500",
+    decorColor: "text-orange-400",
   },
   {
     id: 3,
@@ -25,6 +31,9 @@ export const questions = [
     resultA: "제주된장파",
     resultB: "남해파",
     score: 1.1,
+    bgGradient: "from-green-100 to-teal-50",
+    accentColor: "bg-green-500",
+    decorColor: "text-green-400",
   },
   {
     id: 4,
@@ -34,6 +43,9 @@ export const questions = [
     resultA: "자리물회파",
     resultB: "남해파",
     score: 1.05,
+    bgGradient: "from-teal-100 to-blue-50",
+    accentColor: "bg-teal-500",
+    decorColor: "text-teal-400",
   },
   {
     id: 5,
@@ -43,6 +55,9 @@ export const questions = [
     resultA: "자리물회파",
     resultB: "포항파",
     score: 1.05,
+    bgGradient: "from-red-100 to-pink-50",
+    accentColor: "bg-red-500",
+    decorColor: "text-red-400",
   },
   {
     id: 6,
@@ -52,6 +67,9 @@ export const questions = [
     resultA: "제주된장파",
     resultB: "강릉파",
     score: 1,
+    bgGradient: "from-yellow-100 to-amber-50",
+    accentColor: "bg-yellow-500",
+    decorColor: "text-yellow-400",
   },
   {
     id: 7,
@@ -61,6 +79,9 @@ export const questions = [
     resultA: "속초파",
     resultB: "남해파",
     score: 0.95,
+    bgGradient: "from-purple-100 to-indigo-50",
+    accentColor: "bg-purple-500",
+    decorColor: "text-purple-400",
   },
   {
     id: 8,
@@ -70,6 +91,9 @@ export const questions = [
     resultA: "속초파",
     resultB: "자리물회파",
     score: 0.95,
+    bgGradient: "from-cyan-100 to-sky-50",
+    accentColor: "bg-cyan-500",
+    decorColor: "text-cyan-400",
   },
   {
     id: 9,
@@ -79,5 +103,8 @@ export const questions = [
     resultA: "강릉파",
     resultB: "제주된장파",
     score: 0.95,
+    bgGradient: "from-pink-100 to-rose-50",
+    accentColor: "bg-pink-500",
+    decorColor: "text-pink-400",
   },
 ];

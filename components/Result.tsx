@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { RiKakaoTalkFill } from "react-icons/ri";
 import { FaLink } from "react-icons/fa";
@@ -12,7 +12,7 @@ declare global {
     Kakao?: any;
   }
 }
-
+// 🐟 결과 페이지
 export const ResultComponent = ({
   resultText,
   mulhoeType,
@@ -22,7 +22,6 @@ export const ResultComponent = ({
   mulhoeType: string;
   onRestart: () => void;
 }) => {
-  // Mapping of English mulhoeType to Korean display names
   const mulhoeTypeToKorean: { [key: string]: string } = {
     SokchoPa: "속초파",
     PohangPa: "포항파",
@@ -32,16 +31,42 @@ export const ResultComponent = ({
     NamhaePa: "남해파",
   };
 
-  // Mapping of mulhoeType to details
-  const resultDetails: { [key: string]: { emoji: string; image: string; shareImage: string } } = {
-    SokchoPa: { emoji: "🩵", image: "/imgs/SokchoPa.svg", shareImage: "/imgs/SokchoPa.png" },
-    PohangPa: { emoji: "❤️", image: "/imgs/PohangPa.svg", shareImage: "/imgs/PohangPa.png" },
-    GangneungPa: { emoji: "💖", image: "/imgs/GangneungPa.svg", shareImage: "/imgs/GangneungPa.png" },
-    JejuDoenjangPa: { emoji: "🤎", image: "/imgs/JejuDoenjangPa.svg", shareImage: "/imgs/JejuDoenjangPa.png" },
-    JariMulhoePa: { emoji: "💛", image: "/imgs/JariMulhoePa.svg", shareImage: "/imgs/JariMulhoePa.png" },
-    NamhaePa: { emoji: "💚", image: "/imgs/NamhaePa.svg", shareImage: "/imgs/NamhaePa.png" },
+  const resultDetails: {
+    [key: string]: { emoji: string; image: string; shareImage: string };
+  } = {
+    SokchoPa: {
+      emoji: "🩵",
+      image: "/imgs/SokchoPa.svg",
+      shareImage: "/imgs/SokchoPa.png",
+    },
+    PohangPa: {
+      emoji: "❤️",
+      image: "/imgs/PohangPa.svg",
+      shareImage: "/imgs/PohangPa.png",
+    },
+    GangneungPa: {
+      emoji: "💖",
+      image: "/imgs/GangneungPa.svg",
+      shareImage: "/imgs/GangneungPa.png",
+    },
+    JejuDoenjangPa: {
+      emoji: "🤎",
+      image: "/imgs/JejuDoenjangPa.svg",
+      shareImage: "/imgs/JejuDoenjangPa.png",
+    },
+    JariMulhoePa: {
+      emoji: "💛",
+      image: "/imgs/JariMulhoePa.svg",
+      shareImage: "/imgs/JariMulhoePa.png",
+    },
+    NamhaePa: {
+      emoji: "💚",
+      image: "/imgs/NamhaePa.svg",
+      shareImage: "/imgs/NamhaePa.png",
+    },
   };
 
+  // 🔸 Kakao SDK 초기화
   useEffect(() => {
     const initKakaoSDK = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
@@ -81,13 +106,12 @@ export const ResultComponent = ({
 
     try {
       const shareTitle = "내 물회 취향 테스트 결과!";
-      const shareDescription = `내 물회 취향은 ${mulhoeTypeToKorean[mulhoeType] || mulhoeType}! 너도 테스트 해봐!`;
+      const shareDescription = `내 물회 취향은 ${mulhoeTypeToKorean[mulhoeType] || mulhoeType
+        }! 너도 테스트 해봐!`;
       const shareUrl = "https://mulhoe.vercel.app/";
-      const imageUrl = resultDetails[mulhoeType]?.shareImage || "/imgs/default.jpeg";
+      const imageUrl =
+        resultDetails[mulhoeType]?.shareImage || "/imgs/default.jpeg";
       const fullImageUrl = `https://mulhoe.vercel.app${imageUrl}`;
-
-      // 디버깅을 위한 로그 추가
-      console.log("Share attempt:", { shareTitle, shareDescription, shareUrl, fullImageUrl });
 
       window.Kakao.Share.sendCustom({
         templateId: 124927,
@@ -110,29 +134,26 @@ export const ResultComponent = ({
     navigator.clipboard
       .writeText("https://mulhoe.vercel.app/")
       .then(() => {
-        toast.success("링크가 클립보드에 복사되었습니다.", {
-          duration: 2000,
-        });
+        toast.success("링크가 복사되었습니다!", { duration: 2000 });
       })
       .catch(() => {
-        toast.error("링크 복사 중 오류가 발생했습니다.", {
-          duration: 2000,
-        });
+        toast.error("링크 복사 실패", { duration: 2000 });
       });
   };
 
-  const { emoji, image, shareImage } = resultDetails[mulhoeType] || { emoji: "❓", image: "", shareImage: "" };
+  const { image } = resultDetails[mulhoeType] || { image: "" };
   const displayMulhoeType = mulhoeTypeToKorean[mulhoeType] || mulhoeType;
 
   return (
-    <div className="w-full min-h-[100svh] flex flex-col bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="flex-1 flex flex-col"
-      >
-        {/* Image Section - Full Width */}
+    <div
+      className="relative w-full min-h-[100svh] overflow-hidden flex flex-col items-center"
+      style={{
+        background: "linear-gradient(to bottom, #aee1f9, #ffffff)", // 하늘색 배경
+      }}
+    >
+
+      {/* 내용 */}
+      <div className="relative z-10 flex flex-col items-center justify-between flex-1">
         {image && (
           <div className="flex-1 flex items-center justify-center w-full p-4">
             <img
@@ -143,9 +164,7 @@ export const ResultComponent = ({
           </div>
         )}
 
-        {/* Buttons Section */}
         <div className="w-full px-6 pb-8 space-y-4">
-          {/* Share Buttons */}
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={handleCopyLink}
@@ -162,13 +181,14 @@ export const ResultComponent = ({
               <RiKakaoTalkFill className="w-6 h-6 text-gray-900" />
             </button>
           </div>
+
           <div className="flex items-center justify-center">
             <motion.div
               whileHover={{ scale: 1.1, cursor: "pointer" }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <Image
-                src="/imgs/startBtn.svg"
+                src="/imgs/restart.svg"
                 alt="Start Button"
                 width={360}
                 height={80}
@@ -178,7 +198,7 @@ export const ResultComponent = ({
             </motion.div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
