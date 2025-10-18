@@ -11,9 +11,9 @@ export const StartComponent = ({ onStart }: { onStart: () => void }) => {
         className="object-cover"
         priority
       />
-      <div className="absolute bottom-0 w-full flex justify-center">
+      <div className="absolute bottom-1 w-full flex justify-center">
         <motion.div
-          whileHover={{ scale: 1.1, cursor: "pointer" }}
+          whileHover={{ scale: 1.05, cursor: "pointer" }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
           <Image
