@@ -5,62 +5,7 @@ import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { StartComponent } from "@/components/Start";
 
-// GradientButton Component
-const GradientButton = ({ onClick, className, children }: { onClick: () => void; className?: string; children: React.ReactNode }) => (
-  <button
-    onClick={onClick}
-    className={`bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold hover:from-blue-600 hover:to-indigo-700 transition-all ${className}`}
-  >
-    {children}
-  </button>
-);
-
-// LoadingPage Component
-const LoadingPage = () => (
-  <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col items-center justify-center p-6">
-    <motion.div
-      animate={{ rotate: 360 }}
-      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-      className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full"
-    />
-    <p className="mt-6 text-xl font-semibold text-slate-700">분석 중...</p>
-  </div>
-);
-
-// Define restaurants with their info
-const restaurants: Array<{
-  name: string;
-  address: string;
-  phone: string;
-}> = [
-  { name: "감자바우", address: "강원 속초시 청초호반로 242", phone: "033-632-0734" },
-  { name: "갱수네맛집", address: "강원 속초시 미시령로 3376-4", phone: "033-637-0048" },
-  { name: "구구집", address: "강원 속초시 중앙로 341", phone: "033-636-1888" },
-  { name: "나루터물회", address: "강원 속초시 중앙부두길 75", phone: "010-2846-8611" },
-  { name: "대포전복양푼물회", address: "강원 속초시 대포항길 60", phone: "033-635-1813" },
-  { name: "돌고래회센터", address: "강원 속초시 대포항희망길 49", phone: "033-637-5256" },
-  { name: "동명항오징어난전", address: "강원 속초시 중앙로 214-1", phone: "010-5373-7491" },
-  { name: "동산항물회 속초점", address: "강원 속초시 엑스포로 135-6", phone: "0507-1420-9855" },
-  { name: "무진장 물회", address: "강원 속초시 대포항길 17", phone: "0507-1422-3988" },
-  { name: "물담물회국수", address: "강원 속초시 해오름로 137", phone: "0507-1413-1567" },
-  { name: "민지네물회", address: "강원 속초시 대포항길 62", phone: "033-638-7137" },
-  { name: "봉포머구리집", address: "강원 속초시 영랑해안길 223", phone: "0507-1404-2026" },
-  { name: "속초어장물회", address: "강원 속초시 엑스포로 31", phone: "033-637-8833" },
-  { name: "속초항아리물회", address: "강원 속초시 해오름로188번길 11", phone: "033-635-4488" },
-  { name: "속초해녀마을바람꽃해녀마을", address: "강원 속초시 바람꽃마을길 37 1층", phone: "0507-1416-5157" },
-  { name: "속초해변물회맛집", address: "강원 속초시 새마을길 66", phone: "0507-1431-3588" },
-  { name: "원조속초회국수", address: "강원 속초시 교동 961", phone: "033-635-2732" },
-  { name: "송도물회", address: "강원 속초시 중앙부두길 63", phone: "0507-1392-6985" },
-  { name: "아바이회국수", address: "강원 속초시 청호로 115-12", phone: "033-636-1299" },
-  { name: "영금물회", address: "강원 속초시 영금정로2길 11", phone: "033-631-2358" },
-  { name: "완도회식당 속초", address: "강원 속초시 먹거리4길 21", phone: "033-631-1418" },
-  { name: "진양횟집 속초", address: "강원 속초시 청초호반로 318", phone: "033-635-9999" },
-  { name: "청초수물회 속초본점", address: "강원 속초시 엑스포로 12-36", phone: "033-635-5050" },
-  { name: "청초항회국수", address: "강원 속초시 엑스포로2길 29", phone: "0507-1350-3360" },
-  { name: "화진호 이선장네", address: "강원 속초시 먹거리4길 18-1", phone: "0507-1417-0750" },
-];
-
-// Define questions with types
+// 타입 정의
 type Option = {
   label: string;
   matches: number[];
@@ -77,15 +22,57 @@ type Question = {
   max?: number;
   step?: number;
   labels?: string[];
-  questionId: string; // API용 questionId 추가
+  questionId: string;
 };
 
+type Restaurant = {
+  name: string;
+  address: string;
+  phone: string;
+};
+
+type ProcessProps = {
+  setCurrentState: (state: State) => void;
+  setTopRestaurants: (restaurants: RestaurantWithIndex[]) => void;
+  surveyVersionId: string;
+};
+
+type State = "start" | "process" | "loading" | "result";
+type RestaurantWithIndex = Restaurant & { index: number };
+
+// 레스토랑 데이터
+const restaurants: Restaurant[] = [
+  { name: "감자바우", address: "강원 속초시 청초호반로 242", phone: "033-632-0734" },
+  { name: "갱수네맛집", address: "강원 속초시 미시령로 3376-4", phone: "033-637-0048" },
+  { name: "구구집", address: "강원 속초시 중앙로 341", phone: "033-636-1888" },
+  { name: "나루터물회", address: "강원 속초시 중앙부두길 75", phone: "010-2846-8611" },
+  { name: "대포전복양푼물회", address: "강원 속초시 대포항길 60", phone: "033-635-1813" },
+  { name: "돌고래회센터", address: "강원 속초시 대포항희망길 49", phone: "033-637-5256" },
+  { name: "동명항오징어난전", address: "강원 속초시 중앙로 214-1", phone: "010-5373-7491" },
+  { name: "동산항물회 속초점", address: "강원 속초시 엑스포로 135-6", phone: "0507-1420-9855" },
+  { name: "무진장물회", address: "강원 속초시 대포항길 17", phone: "0507-1422-3988" },
+  { name: "물담물회국수", address: "강원 속초시 해오름로 137", phone: "0507-1413-1567" },
+  { name: "민지네물회", address: "강원 속초시 대포항길 62", phone: "033-638-7137" },
+  { name: "봉포머구리집", address: "강원 속초시 영랑해안길 223", phone: "0507-1404-2026" },
+  { name: "속초어장물회", address: "강원 속초시 엑스포로 31", phone: "033-637-8833" },
+  { name: "속초항아리물회", address: "강원 속초시 해오름로188번길 11", phone: "033-635-4488" },
+  { name: "속초해녀마을바람꽃해녀마을", address: "강원 속초시 바람꽃마을길 37 1층", phone: "0507-1416-5157" },
+  { name: "속초해변물회맛집", address: "강원 속초시 새마을길 66", phone: "0507-1431-3588" },
+  { name: "원조속초회국수", address: "강원 속초시 교동 961", phone: "033-635-2732" },
+  { name: "송도물회", address: "강원 속초시 중앙부두길 63", phone: "0507-1392-6985" },
+  { name: "아바이회국수", address: "강원 속초시 청호로 115-12", phone: "033-636-1299" },
+  { name: "영금물회", address: "강원 속초시 영금정로2길 11", phone: "033-631-2358" },
+  { name: "완도회식당 속초", address: "강원 속초시 먹거리4길 21", phone: "033-631-1418" },
+  { name: "진양횟집", address: "강원 속초시 청초호반로 318", phone: "033-635-9999" },
+  { name: "청초수물회 속초본점", address: "강원 속초시 엑스포로 12-36", phone: "033-635-5050" },
+  { name: "청초항회국수", address: "강원 속초시 엑스포로2길 29", phone: "0507-1350-3360" },
+  { name: "화진호 이선장네", address: "강원 속초시 먹거리4길 18-1", phone: "0507-1417-0750" },
+];
+
+// 질문 데이터 (Question ID 수정)
 const questions: Question[] = [
   {
-    id: 1,
-    text: "1. 육수 스타일은?(택1)",
-    type: "single",
-    questionId: "style",
+    id: 1, text: "1. 육수 스타일은?(택1)", type: "single", questionId: "style",
     options: [
       { label: "진한 스타일", matches: [0, 1, 3, 5, 6, 8, 9, 10, 12, 19, 21, 23] },
       { label: "개성 강조형", matches: [2, 4, 7, 11, 13, 18, 20, 22] },
@@ -93,10 +80,7 @@ const questions: Question[] = [
     ],
   },
   {
-    id: 2,
-    text: "2. 육수 얼음은?(택1)",
-    type: "single",
-    questionId: "ice",
+    id: 2, text: "2. 육수 얼음은?(택1)", type: "single", questionId: "ice",
     options: [
       { label: "수저로 저으면 금새 녹는 얼음육수", matches: [2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24] },
       { label: "얼음 동동 시원한 육수", matches: [1, 5, 6, 16] },
@@ -104,11 +88,7 @@ const questions: Question[] = [
     ],
   },
   {
-    id: 3,
-    text: "3. 물회의 꽃, 해산물 고명은?(다중선택)",
-    type: "multi",
-    isImage: true,
-    questionId: "seafood",
+    id: 3, text: "3. 물회의 꽃, 해산물 고명은?(다중선택)", type: "multi", isImage: true, questionId: "seafood",
     options: [
       { label: "생선회", matches: [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], imageSrc: "/물회취향_이미지소스/3. 물회의 꽃 해산물 고명은/생선회.webp" },
       { label: "해삼", matches: [4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 19, 23], imageSrc: "/물회취향_이미지소스/3. 물회의 꽃 해산물 고명은/해삼.webp" },
@@ -122,11 +102,7 @@ const questions: Question[] = [
     ],
   },
   {
-    id: 4,
-    text: "4. 고명에는 이것만큼은 꼭!(다중선택)",
-    type: "multi",
-    isImage: true,
-    questionId: "topping",
+    id: 4, text: "4. 고명에는 이것만큼은 꼭!(다중선택)", type: "multi", isImage: true, questionId: "garnish",
     options: [
       { label: "당근", matches: [1, 2, 3, 4, 5, 11, 12, 13, 15, 18, 19, 20, 21, 22, 23], imageSrc: "/물회취향_이미지소스/4. 고명에는 이것만큼은 꼭/당근.webp" },
       { label: "장뇌삼", matches: [4], imageSrc: "/물회취향_이미지소스/4. 고명에는 이것만큼은 꼭/장뇌삼.webp" },
@@ -149,10 +125,7 @@ const questions: Question[] = [
     ],
   },
   {
-    id: 5,
-    text: "5. 빛나지 않아도 빛이 나는 밑반찬(택1)",
-    type: "single",
-    questionId: "side",
+    id: 5, text: "5. 빛나지 않아도 빛이 나는 밑반찬(택1)", type: "single", questionId: "sides",
     options: [
       { label: "없어도 괜찮아요!", matches: [7] },
       { label: "적지만 확실한 밑반찬!", matches: [0, 5, 8, 9, 13, 15, 18, 23] },
@@ -160,11 +133,7 @@ const questions: Question[] = [
     ],
   },
   {
-    id: 6,
-    text: "6. 담겨나올 그릇은?",
-    type: "single",
-    isImage: true,
-    questionId: "bowl",
+    id: 6, text: "6. 담겨나올 그릇은?", type: "single", isImage: true, questionId: "bowl",
     options: [
       { label: "정갈한 사기그릇", matches: [0, 3, 5, 8, 9, 11, 13], imageSrc: "/물회취향_이미지소스/6. 담겨나올 그릇/사기그릇.webp" },
       { label: "고즈넉한 놋그릇", matches: [22], imageSrc: "/물회취향_이미지소스/6. 담겨나올 그릇/놋그릇.webp" },
@@ -173,42 +142,22 @@ const questions: Question[] = [
     ],
   },
   {
-    id: 7,
-    text: "7. 밥VS국수(다중선택)",
-    type: "multi",
-    isImage: true,
-    questionId: "carb",
+    id: 7, text: "7. 밥VS국수(다중선택)", type: "multi", isImage: true, questionId: "carb",
     options: [
       { label: "밥이 먼저죠", matches: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], imageSrc: "/물회취향_이미지소스/7. 밥vs국수/밥이 먼저죠.webp" },
       { label: "국수가 먼저죠", matches: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], imageSrc: "/물회취향_이미지소스/7. 밥vs국수/국수가 먼저죠.webp" },
     ],
   },
   {
-    id: 8,
-    text: "8. 육수의 염도(5단계)",
-    type: "slider",
-    questionId: "salt",
-    min: 0,
-    max: 5,
-    step: 1,
-    labels: ["슴슴한게 좋아요", "짠게 좋아요"],
+    id: 8, text: "8. 육수의 염도(5단계)", type: "slider", questionId: "salt",
+    min: 0, max: 5, step: 1, labels: ["슴슴한게 좋아요", "짠게 좋아요"],
   },
   {
-    id: 9,
-    text: "9. 육수의 당도(5단계)",
-    type: "slider",
-    questionId: "sweet",
-    min: 0,
-    max: 5,
-    step: 1,
-    labels: ["달달해야죠", "시큼해야죠"],
+    id: 9, text: "9. 육수의 당도(5단계)", type: "slider", questionId: "sugar",
+    min: 0, max: 5, step: 1, labels: ["달달해야죠", "시큼해야죠"],
   },
   {
-    id: 10,
-    text: "10. 육수의 첨가물",
-    type: "single",
-    isImage: true,
-    questionId: "additive",
+    id: 10, text: "10. 육수의 첨가물", type: "single", isImage: true, questionId: "additive",
     options: [
       { label: "식초를 곁들인 육수", matches: [], imageSrc: "/물회취향_이미지소스/10. 육수의 첨가물/식초를 곁들인 육수.webp" },
       { label: "참기름의 향 가득 육수", matches: [], imageSrc: "/물회취향_이미지소스/10. 육수의 첨가물/참기름의 향 가득 육수.webp" },
@@ -217,18 +166,42 @@ const questions: Question[] = [
   },
 ];
 
-// ProcessComponent
-const ProcessComponent: React.FC<{ onSubmit: (answers: Record<number, number | number[]>) => void }> = ({ onSubmit }) => {
+// 컴포넌트들
+const GradientButton: React.FC<{ onClick: () => void; className?: string; children: React.ReactNode }> = ({ 
+  onClick, 
+  className, 
+  children 
+}) => (
+  <button
+    onClick={onClick}
+    className={`bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold hover:from-blue-600 hover:to-indigo-700 transition-all ${className || ""}`}
+  >
+    {children}
+  </button>
+);
+
+const LoadingPage: React.FC = () => (
+  <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col items-center justify-center p-6">
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+      className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full"
+    />
+    <p className="mt-6 text-base font-semibold text-slate-700">분석 중...</p>
+  </div>
+);
+
+const ProcessComponent: React.FC<ProcessProps> = ({ setCurrentState, setTopRestaurants, surveyVersionId }) => {
   const [answers, setAnswers] = useState<Record<number, number | number[]>>({});
   const questionRefs = useRef<HTMLDivElement[]>([]);
   const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<{ name: string; address: string; phone: string; index: number } | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantWithIndex | null>(null);
 
-  const handleSingleChange = (qId: number, optionIndex: number) => {
+  const handleSingleChange = (qId: number, optionIndex: number): void => {
     setAnswers((prev) => ({ ...prev, [qId]: optionIndex }));
   };
 
-  const handleMultiChange = (qId: number, optionIndex: number, checked: boolean) => {
+  const handleMultiChange = (qId: number, optionIndex: number, checked: boolean): void => {
     setAnswers((prev) => {
       const current = (prev[qId] as number[]) || [];
       return {
@@ -238,79 +211,58 @@ const ProcessComponent: React.FC<{ onSubmit: (answers: Record<number, number | n
     });
   };
 
-  const handleSliderChange = (qId: number, value: number) => {
+  const handleSliderChange = (qId: number, value: number): void => {
     setAnswers((prev) => ({ ...prev, [qId]: value }));
   };
 
-  // API 요청 함수
-  const sendSurveyData = async (rawAnswers: Record<number, number | number[]>) => {
-    try {
-      // 1. Raw Answers를 API 형식으로 변환
-      const apiAnswers = questions.map((q) => {
-        const answer = rawAnswers[q.id];
-        let response: string[] = [];
-        
-        if (q.type === "single" && typeof answer === "number" && q.options) {
-          response = [q.options[answer].label];
-        } else if (q.type === "multi" && Array.isArray(answer) && q.options) {
-          response = answer.map((idx) => q.options![idx].label);
-        } else if (q.type === "slider" && typeof answer === "number") {
-          response = [answer.toString()];
-        }
-        // 미선택 시 빈 배열 []
-        
-        return {
-          questionId: q.questionId,
-          response,
-        };
-      });
+  const sendSurveyData = async (rawAnswers: Record<number, number | number[]>): Promise<any> => {
 
-      // 2. API 요청 데이터 구성
-      const requestData = {
-        surveyVersionId: "651b75c8e312891d4e4c9f1a", // ★ 실제로는 GET으로 받아온 값 사용
-        answers: apiAnswers,
-      };
+    const apiAnswers = questions.map((q) => {
+      const answer = rawAnswers[q.id];
+      let response: string[] = [];
 
-      console.log("=== API 전송 데이터 ===");
-      console.log(JSON.stringify(requestData, null, 2));
-
-      // 3. POST 요청
-      const response = await fetch("/api/survey", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast.success("설문이 성공적으로 저장되었습니다!");
-        onSubmit(rawAnswers); // 맛집 추천 로직 실행
-      } else {
-        toast.error("설문 저장에 실패했습니다.");
+      if (q.type === "single" && typeof answer === "number" && q.options) {
+        const option = q.options[answer];
+        if (option) response = [option.label];
+      } else if (q.type === "multi" && Array.isArray(answer) && q.options) {
+        response = answer
+          .map((idx) => q.options?.[idx]?.label)
+          .filter((label): label is string => label !== undefined);
+      } else if (q.type === "slider" && typeof answer === "number") {
+        response = [answer.toString()];
       }
-    } catch (error) {
-      console.error("API 요청 에러:", error);
-      toast.error("서버와의 연결에 문제가 있습니다.");
-      onSubmit(rawAnswers); // 에러여도 맛집 추천은 진행
-    }
+
+      return { questionId: q.questionId, response };
+    });
+
+    const requestData = {
+      answers: apiAnswers,
+    };
+
+    const response = await fetch("/api/survey", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const result = await response.json();
+
+    if (!result.success) throw new Error(result.message);
+
+    return result;
   };
 
-  const submit = async () => {
+  const submit = async (): Promise<void> => {
     let missing: number | null = null;
     for (const q of questions) {
       const ans = answers[q.id];
-      if (q.type === "single" && typeof ans !== "number") {
-        missing = q.id;
-        break;
+      if (q.type === "single" && (typeof ans !== "number" || ans < 0)) {
+        missing = q.id; break;
       } else if (q.type === "multi" && (!Array.isArray(ans) || ans.length === 0)) {
-        missing = q.id;
-        break;
-      } else if (q.type === "slider" && typeof ans !== "number") {
-        missing = q.id;
-        break;
+        missing = q.id; break;
+      } else if (q.type === "slider" && (typeof ans !== "number" || ans < 0 || ans > 5)) {
+        missing = q.id; break;
       }
     }
 
@@ -320,58 +272,85 @@ const ProcessComponent: React.FC<{ onSubmit: (answers: Record<number, number | n
       return;
     }
 
-    // API로 데이터 전송 후 맛집 추천
-    await sendSurveyData(answers);
+    try {
+      setCurrentState("loading");
+      const result = await sendSurveyData(answers);
+
+      const enrichedTopRestaurants = result.topRestaurants.map((r: Restaurant) => ({
+        ...r,
+        index: restaurants.findIndex(res => res.name === r.name) + 1
+      })) as RestaurantWithIndex[];
+
+      setTimeout(() => {
+        setTopRestaurants(enrichedTopRestaurants);
+        setCurrentState("result");
+        toast.success("당신의 물회 맛집을 찾았어요! 🎉");
+      }, 1500);
+
+    } catch (error) {
+      console.error("💥 에러:", error);
+      setCurrentState("process");
+      toast.error("제출에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col items-center p-6 overflow-y-auto relative">
+    <div className="w-full min-h-screen bg-gradient-to-r from-[#FF6F91] via-[#FFD43B] to-[#4FB1FF] flex flex-col items-center p-6 overflow-y-auto relative">
       <Toaster />
-      <button 
+      
+      <GradientButton 
         onClick={() => setIsDictionaryOpen(true)} 
-        className="fixed top-4 right-4 bg-white px-4 py-2 rounded shadow z-40"
+        className="fixed top-4 right-4 px-6 py-3 rounded-full shadow-lg z-40 text-base font-semibold"
       >
         물회 도감
-      </button>
+      </GradientButton>
+
       {isDictionaryOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto relative">
+            <button 
+              onClick={() => setIsDictionaryOpen(false)} 
+              className="absolute top-4 right-4 text-gray-500 text-xl font-bold hover:text-gray-700"
+            >
+              ×
+            </button>
             <h2 className="text-2xl font-bold mb-4">물회 도감</h2>
             {selectedRestaurant ? (
               <div className="mb-6">
-                <img 
-                  src={`/속초물회사진/${selectedRestaurant.index}. ${selectedRestaurant.name}.png`} 
-                  alt={selectedRestaurant.name} 
-                  className="w-full h-48 object-cover rounded-lg mb-2" 
+                <img
+                  src={`/속초물회사진/${selectedRestaurant.index}. ${selectedRestaurant.name}.png`}
+                  alt={selectedRestaurant.name}
+                  className="w-full h-48 object-cover rounded-lg mb-2"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                  }}
                 />
                 <h3 className="text-xl font-semibold">{selectedRestaurant.name}</h3>
-                <p>주소: {selectedRestaurant.address}</p>
-                <p>전화: {selectedRestaurant.phone}</p>
+                <p className="text-base">주소: {selectedRestaurant.address}</p>
+                <p className="text-base">전화: {selectedRestaurant.phone}</p>
               </div>
             ) : (
-              <p className="mb-6">식당을 선택하세요.</p>
+              <p className="mb-6 text-base">식당을 선택하세요.</p>
             )}
             <div className="grid grid-cols-2 gap-2">
               {restaurants.map((rest, idx) => (
-                <button 
-                  key={idx} 
-                  onClick={() => setSelectedRestaurant({ ...rest, index: idx + 1 })} 
-                  className="p-2 bg-blue-100 rounded hover:bg-blue-200"
+                <button
+                  key={idx}
+                  onClick={() => setSelectedRestaurant({ ...rest, index: idx + 1 })}
+                  className="p-2 bg-blue-100 rounded hover:bg-blue-200 text-sm"
                 >
                   {rest.name}
                 </button>
               ))}
             </div>
-            <button 
-              onClick={() => setIsDictionaryOpen(false)} 
-              className="mt-4 w-full py-2 bg-red-500 text-white rounded"
-            >
+            <GradientButton onClick={() => setIsDictionaryOpen(false)} className="mt-4 w-full py-3 rounded-lg text-base">
               닫기
-            </button>
+            </GradientButton>
           </div>
         </div>
       )}
-      <div className="w-full max-w-4xl space-y-8">
+
+      <div className="w-full max-w-4xl space-y-8 pt-20">
         {questions.map((q, index) => (
           <motion.div
             key={q.id}
@@ -383,8 +362,9 @@ const ProcessComponent: React.FC<{ onSubmit: (answers: Record<number, number | n
             ref={(el) => { questionRefs.current[index] = el!; }}
           >
             <h2 className="text-2xl font-bold mb-6 text-slate-800 tracking-tight">{q.text}</h2>
+
             {q.type === "single" && q.options && (
-              <div className={`grid ${q.isImage ? (q.id === 6 || q.id === 10 ? 'grid-cols-2 gap-4' : 'grid-cols-2 sm:grid-cols-3 gap-4') : 'space-y-3'}`}>
+              <div className={`grid ${q.isImage ? (q.id === 6 || q.id === 10 ? 'grid-cols-2 gap-4' : 'grid-cols-3 gap-4') : 'space-y-3'}`}>
                 {q.options.map((opt, idx) => (
                   <label key={idx} className={`cursor-pointer group ${q.id === 10 && idx === 2 ? 'col-span-2 justify-self-center' : ''}`}>
                     <input
@@ -394,83 +374,147 @@ const ProcessComponent: React.FC<{ onSubmit: (answers: Record<number, number | n
                       onChange={() => handleSingleChange(q.id, idx)}
                       className="hidden"
                     />
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`p-4 rounded-2xl transition-all duration-300 ${answers[q.id] === idx ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-2 border-blue-400 shadow-lg text-white' : 'bg-slate-50 border-2 border-slate-200 hover:border-blue-300 hover:shadow-md'}`}
+                      className={`p-4 rounded-2xl transition-all duration-300 ${
+                        answers[q.id] === idx 
+                          ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-2 border-blue-400 shadow-lg text-white' 
+                          : 'bg-slate-50 border-2 border-slate-200 hover:border-blue-300 hover:shadow-md'
+                      }`}
                     >
                       {opt.imageSrc && (
                         <div className="w-full h-32 flex items-center justify-center mb-3">
-                          <img
-                            src={opt.imageSrc}
-                            alt={opt.label}
+                          <img 
+                            src={opt.imageSrc} 
+                            alt={opt.label} 
                             className="object-contain w-32 h-32"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
                           />
                         </div>
                       )}
-                      <span className={`block text-center font-semibold ${answers[q.id] === idx ? 'text-white' : 'text-slate-700 group-hover:text-blue-600'}`}>{opt.label}</span>
+                      <span className={`block text-center font-semibold text-sm ${
+                        answers[q.id] === idx ? 'text-white' : 'text-slate-700 group-hover:text-blue-600'
+                      }`}>
+                        {opt.label}
+                      </span>
                     </motion.div>
                   </label>
                 ))}
               </div>
             )}
+
             {q.type === "multi" && q.options && (
-              <div className={`grid ${q.isImage ? (q.id === 7 ? 'grid-cols-2 gap-3' : 'grid-cols-2 sm:grid-cols-3 gap-3') : 'space-y-3'}`}>
-                {q.options.map((opt, idx) => (
-                  <label key={idx} className="cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={(answers[q.id] as number[])?.includes(idx) || false}
-                      onChange={(e) => handleMultiChange(q.id, idx, e.target.checked)}
-                      className="hidden"
-                    />
-                    <motion.div 
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`p-3 rounded-2xl transition-all duration-300 ${(answers[q.id] as number[])?.includes(idx) ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-2 border-blue-400 shadow-lg text-white' : 'bg-slate-50 border-2 border-slate-200 hover:border-blue-300 hover:shadow-md'}`}
-                    >
-                      {opt.imageSrc && (
-                        <div className="w-full h-32 flex items-center justify-center mb-2">
-                          <img
-                            src={opt.imageSrc}
-                            alt={opt.label}
-                            className="object-contain w-32 h-32"
-                          />
-                        </div>
-                      )}
-                      <span className={`block text-center text-sm font-semibold ${(answers[q.id] as number[])?.includes(idx) ? 'text-white' : 'text-slate-700 group-hover:text-blue-600'}`}>{opt.label}</span>
-                    </motion.div>
-                  </label>
-                ))}
+              <div className={`grid ${q.isImage ? (q.id === 7 ? 'grid-cols-2 gap-3' : 'grid-cols-3 gap-3') : 'space-y-3'}`}>
+                {q.options.map((opt, idx) => {
+                  const isChecked = (answers[q.id] as number[])?.includes(idx) || false;
+                  return (
+                    <label key={idx} className="cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => handleMultiChange(q.id, idx, e.target.checked)}
+                        className="hidden"
+                      />
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`p-3 rounded-2xl transition-all duration-300 ${
+                          isChecked 
+                            ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-2 border-blue-400 shadow-lg text-white' 
+                            : 'bg-slate-50 border-2 border-slate-200 hover:border-blue-300 hover:shadow-md'
+                        }`}
+                      >
+                        {opt.imageSrc && (
+                          <div className="w-full h-32 flex items-center justify-center mb-2">
+                            <img 
+                              src={opt.imageSrc} 
+                              alt={opt.label} 
+                              className="object-contain w-32 h-32"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                        <span className={`block text-center text-sm font-semibold ${
+                          isChecked ? 'text-white' : 'text-slate-700 group-hover:text-blue-600'
+                        }`}>
+                          {opt.label}
+                        </span>
+                      </motion.div>
+                    </label>
+                  );
+                })}
               </div>
             )}
+
             {q.type === "slider" && q.min !== undefined && q.max !== undefined && q.step !== undefined && (
               <div className="p-6 bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl">
-                <input
-                  type="range"
-                  min={q.min}
-                  max={q.max}
-                  step={q.step}
-                  value={(answers[q.id] as number) ?? q.min}
-                  onChange={(e) => handleSliderChange(q.id, parseInt(e.target.value))}
-                  className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-                <div className="flex justify-between mt-2 text-sm text-slate-600">
-                  {[0, 1, 2, 3, 4, 5].map((num) => (
-                    <span key={num}>{num}</span>
-                  ))}
-                </div>
-                {q.labels && (
-                  <div className="flex justify-between mt-4 text-sm font-medium text-slate-600">
-                    <span>{q.labels[0]}</span>
-                    <span>{q.labels[1]}</span>
+                <div className="relative w-full">
+                  <input
+                    type="range"
+                    min={q.min}
+                    max={q.max}
+                    step={q.step}
+                    value={(answers[q.id] as number) ?? 0}
+                    onChange={(e) => handleSliderChange(q.id, parseInt(e.target.value))}
+                    className="absolute w-full h-12 opacity-0 cursor-pointer z-20"
+                  />
+                  <div className="relative h-12 flex items-center">
+                    <div className="w-full h-2 bg-gray-200 rounded-full"></div>
+                    <motion.div
+                      className="absolute h-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${(((answers[q.id] as number) ?? 0) / q.max) * 100}%`
+                      }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      style={{ zIndex: 10 }}
+                    />
+                    <motion.div
+                      className="absolute w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-lg cursor-pointer z-30"
+                      animate={{
+                        left: `${(((answers[q.id] as number) ?? 0) / q.max) * 100}%`
+                      }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      style={{ transform: 'translateX(-50%)', top: '50%', marginTop: '-12px' }}
+                    >
+                      <div className="absolute inset-0 bg-white rounded-full shadow-inner"></div>
+                    </motion.div>
                   </div>
-                )}
+                  <div className="flex justify-between text-sm text-slate-600 mt-4">
+                    {Array.from({ length: 6 }, (_, i) => i).map((num) => (
+                      <span
+                        key={num}
+                        className={`font-semibold text-base ${
+                          (answers[q.id] as number ?? 0) === num
+                            ? 'text-blue-600 scale-110'
+                            : 'text-slate-600'
+                        }`}
+                      >
+                        {num}
+                      </span>
+                    ))}
+                  </div>
+                  {q.labels && (
+                    <div className="flex justify-between text-sm font-medium mt-2">
+                      <span className="text-blue-600 font-bold">{q.labels[0]}</span>
+                      <span className="text-indigo-600 font-bold">{q.labels[1]}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </motion.div>
         ))}
-        <GradientButton onClick={submit} className="w-full py-4 text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+
+        <GradientButton 
+          onClick={submit} 
+          className="w-full py-4 text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+        >
           결과 보기
         </GradientButton>
       </div>
@@ -478,56 +522,31 @@ const ProcessComponent: React.FC<{ onSubmit: (answers: Record<number, number | n
   );
 };
 
-// Main Component
 export default function Home() {
-  const [currentState, setCurrentState] = useState<"start" | "process" | "loading" | "result">("start");
-  const [topRestaurants, setTopRestaurants] = useState<Array<{ name: string; address: string; phone: string; index: number }>>([]);
-
-  const handleSubmit = (answers: Record<number, number | number[]>) => {
-    const scores: number[] = new Array(restaurants.length).fill(0);
-    for (let qId = 1; qId <= 6; qId++) {
-      const q = questions.find((q) => q.id === qId);
-      if (!q) continue;
-      const ans = answers[qId];
-      if (q.type === "single" && typeof ans === "number" && q.options?.[ans]) {
-        const matches = q.options[ans].matches;
-        matches.forEach((idx) => scores[idx]++);
-      } else if (q.type === "multi" && Array.isArray(ans) && q.options) {
-        ans.forEach((optIdx: number) => {
-          const matches = q.options?.[optIdx]?.matches;
-          matches?.forEach((idx) => scores[idx]++);
-        });
-      }
-    }
-
-    let maxScore = Math.max(...scores);
-    let topIndices: number[] = scores.map((s, i) => (s === maxScore ? i : -1)).filter((i) => i !== -1);
-    if (topIndices.length > 2) {
-      topIndices.sort(() => Math.random() - 0.5);
-      topIndices = topIndices.slice(0, 2);
-    } else if (topIndices.length < 2) {
-      let secondMax = scores.filter((s) => s < maxScore).reduce((a, b) => Math.max(a, b), -1);
-      if (secondMax > -1) {
-        const secondIndices = scores.map((s, i) => (s === secondMax ? i : -1)).filter((i) => i !== -1);
-        secondIndices.sort(() => Math.random() - 0.5);
-        topIndices.push(secondIndices[0]);
-      }
-    }
-
-    setTopRestaurants(topIndices.map((i) => ({ ...restaurants[i], index: i + 1 })));
-    setCurrentState("loading");
-  };
+  const [currentState, setCurrentState] = useState<State>("start");
+  const [topRestaurants, setTopRestaurants] = useState<RestaurantWithIndex[]>([]);
+  const [surveyVersionId, setSurveyVersionId] = useState<string>("");
 
   useEffect(() => {
-    if (currentState === "loading") {
-      const timer = setTimeout(() => {
-        setCurrentState("result");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentState]);
+    const fetchSurveyVersion = async (): Promise<void> => {
+      try {
+        const res = await fetch("/api/survey");
+        const data = await res.json();
+        if (data.success && data.surveyVersionId) {
+          setSurveyVersionId(data.surveyVersionId);
+        } else {
+          // Fallback
+          setSurveyVersionId("651b75c8e312891d4e4c9f1a");
+        }
+      } catch (error) {
+        console.error("설문 버전 로딩 실패:", error);
+        setSurveyVersionId("651b75c8e312891d4e4c9f1a");
+      }
+    };
+    fetchSurveyVersion();
+  }, []);
 
-  const restart = () => {
+  const restart = (): void => {
     setCurrentState("start");
     setTopRestaurants([]);
   };
@@ -539,13 +558,22 @@ export default function Home() {
           case "start":
             return <StartComponent onStart={() => setCurrentState("process")} />;
           case "process":
-            return <ProcessComponent onSubmit={handleSubmit} />;
+            return surveyVersionId ? (
+              <ProcessComponent
+                setCurrentState={setCurrentState}
+                setTopRestaurants={setTopRestaurants}
+                surveyVersionId={surveyVersionId}
+              />
+            ) : (
+              <LoadingPage />
+            );
           case "loading":
             return <LoadingPage />;
           case "result":
             return (
               <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col items-center p-6">
-                <motion.h1 
+                <Toaster />
+                <motion.h1
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-4xl font-bold mb-8 text-slate-800 tracking-tight"
@@ -560,21 +588,31 @@ export default function Home() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.5, delay: idx * 0.2 }}
                       whileHover={{ scale: 1.02 }}
-                      className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-200 hover:shadow-3xl transition-all duration-300"
+                      className={`bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-200 hover:shadow-3xl transition-all duration-300 ${
+                        idx === 0 ? 'bg-gradient-to-br from-yellow-100 to-amber-100 border-4 border-yellow-400 shadow-4xl scale-105' : ''
+                      }`}
                     >
                       <div className="relative h-64 w-full bg-gradient-to-br from-blue-100 to-indigo-100">
                         <img
                           src={`/속초물회사진/${rest.index}. ${rest.name}.png`}
                           alt={rest.name}
                           className="w-full h-full object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                          }}
                         />
-                        <div className="absolute top-4 left-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg">
+                        <div className={`absolute top-4 left-4 ${
+                          idx === 0 ? 'bg-gradient-to-r from-yellow-500 to-amber-600' : 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                        } text-white px-4 py-2 rounded-full font-bold text-base shadow-lg`}>
                           {idx + 1}위
                         </div>
+                        {idx === 0 && (
+                          <span className="absolute top-4 right-4 text-4xl">👑</span>
+                        )}
                       </div>
                       <div className="p-6">
                         <h2 className="text-2xl font-bold mb-4 text-slate-800">{rest.name}</h2>
-                        <div className="space-y-2 text-slate-600">
+                        <div className="space-y-2 text-slate-600 text-base">
                           <p className="flex items-center gap-2">
                             <span className="font-semibold text-blue-600">📍</span>
                             {rest.address}
@@ -587,7 +625,10 @@ export default function Home() {
                       </div>
                     </motion.div>
                   ))}
-                  <GradientButton onClick={restart} className="w-full py-4 text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transition-shadow mt-8">
+                  <GradientButton 
+                    onClick={restart} 
+                    className="w-full py-4 text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transition-shadow mt-8"
+                  >
                     다시 하기
                   </GradientButton>
                 </div>

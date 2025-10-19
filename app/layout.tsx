@@ -15,13 +15,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/imgs/logo.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Dongle&display=swap"
-          rel="stylesheet"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Dongle&family=Gothic+A1&display=swap" rel="stylesheet" />
+        <link rel="icon" href="/imgs/logo.png" />
         <Script src="//wcs.naver.net/wcslog.js" strategy="beforeInteractive"></Script>
         <Script strategy="lazyOnload">
           {`
@@ -45,7 +42,7 @@ export default function RootLayout({
       </head>
       <body
         className="antialiased w-full overflow-x-hidden bg-gradient-to-r from-[#FF6F91] via-[#FFD43B] to-[#4FB1FF]"
-        style={{ fontFamily: "'Dongle', sans-serif" }}
+        style={{ fontFamily: "'Gothic A1', sans-serif" }}
       >
         <div className="max-w-[480px] mx-auto bg-white min-h-screen">
           {children}

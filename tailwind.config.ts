@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        dongle: ["Dongle", "sans-serif"], // 여기서 이름을 font-dongle로 사용 가능
+        gothic: ["Gothic A1", "sans-serif"],
       },
     },
   },
