@@ -19,8 +19,8 @@ export const StartComponent = ({ onStart }: { onStart: () => void }) => {
           <Image
             src="/imgs/startBtn.svg"
             alt="Start Button"
-            width={360}
-            height={80}
+            width={320}
+            height={60}
             className="object-contain"
             onClick={onStart}
           />
